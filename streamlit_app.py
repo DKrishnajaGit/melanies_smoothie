@@ -22,8 +22,22 @@ ingredient_list = st.multiselect(
     "Choose up to 5 ingredients:", fruit_options, max_selections=5
 )
 
+# if ingredient_list:
+#     ingredients_string = " ".join(ingredient_list)
+#     st.write("You selected:", ingredient_list)
 if ingredient_list:
-    ingredients_string = " ".join(ingredient_list)
+    # st.write(ingredient_list)
+    # st.text(ingredient_list)
+    ingrediants_string = ''    
+    for fruit_chosen in ingredient_list:
+        ingrediants_string+= fruit_chosen + ' '
+        st.subheader(fruit_chosen+ ' Nutrition Information')
+        # External API call (fixed URL string)
+# try:
+    smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/"+ fruit_chosen)
+    st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
+# except requests.exceptions.RequestException as e:
+#     st.error(f"API request failed: {e}")
     st.write("You selected:", ingredient_list)
 
     my_insert_stmt = f"""
@@ -37,8 +51,8 @@ if ingredient_list:
         st.success("Your Smoothie is ordered, " + name_on_order + "!! ✅")
 
 # External API call (fixed URL string)
-try:
-    smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon")
-    st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
-except requests.exceptions.RequestException as e:
-    st.error(f"API request failed: {e}")
+# try:
+#     smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon")
+#     st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
+# except requests.exceptions.RequestException as e:
+    # st.error(f"API request failed: {e}")
