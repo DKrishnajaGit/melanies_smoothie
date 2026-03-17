@@ -2,7 +2,7 @@
 import streamlit as st
 # from snowflake.snowpark.python import aamply
 
-from snowflake.snowpark.context import get_active_session
+# from snowflake.snowpark.context import get_active_session
 from snowflake.snowpark.functions import col
 
 
@@ -44,3 +44,5 @@ if time_to_insert:
     if ingrediants_string:
         session.sql(my_insert_stmt).collect()
     st.success('Your Smoothie is ordered, '+name_on_order+'!!', icon="✅")
+cnx = st.connection("snowflake")
+session = cnx.session()
