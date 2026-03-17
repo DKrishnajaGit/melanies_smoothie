@@ -1,51 +1,44 @@
 # Import python packages.
 import streamlit as st
-# from snowflake.snowpark.python import aamply
-
-from snowflake.snowpark.context import get_active_session
 from snowflake.snowpark.functions import col
-
+import requests
 
 # Write directly to the app.
-st.title(f" :cup_with_straw: Customize your Smoothie! :cup_with_straw:")
+st.title("🥤 Customize your Smoothie! 🥤")
+st.write("Choose the fruits 🍌 🍓 🍍 🍎 🥭 🌰 you want in your custom smoothie!")
 
-st.write(f"Choose the fruits :banana: :strawberry: :pineapple: :apple: :mango: :chestnut: you want in your custom smoothie! :cup_with_straw:")
+name_on_order = st.text_input("Name on Smoothie")
+st.write("The name on the smoothie will be: " + name_on_order)
 
-name_on_order = st.text_input('Name on Smoothie')
-st.write('The name on the smoothie will be: '+name_on_order)
-
-# session = get_active_session() 
+# Connect to Snowflake
 cnx = st.connection("snowflake")
 session = cnx.session()
 
-# session = get_active_session()
-my_dataframe = session.table("smoothies.public.fruit_options").select (col('fruit_name'))
-# st.dataframe(data=my_dataframe, use_container_width=True)
+# Query fruit options
+my_dataframe = session.table("smoothies.public.fruit_options").select(col("fruit_name"))
+fruit_options = [row.FRUIT_NAME for row in my_dataframe.collect()]
 
 ingredient_list = st.multiselect(
-    'Choose upto 5 ingredients:', my_dataframe, max_selections = 5)
+    "Choose up to 5 ingredients:", fruit_options, max_selections=5
+)
 
 if ingredient_list:
-    # st.write(ingredient_list)
-    # st.text(ingredient_list)
-    ingredients_string = ''    
-    for fruit_chosen in ingredient_list:
-        ingredients_string += fruit_chosen + ' '
-        
+    ingredients_string = " ".join(ingredient_list)
     st.write("You selected:", ingredient_list)
 
-# my_insert_stmt = """ insert into smoothies.public.orders(ingredients) values ('""" + ingrediants_string + """')"""
+    my_insert_stmt = f"""
+        insert into smoothies.public.orders(ingredients, name_on_order)
+        values ('{ingredients_string}', '{name_on_order}')
+    """
+    st.write(my_insert_stmt)
 
-my_insert_stmt = """ insert into smoothies.public.orders(ingredients, name_on_order)
-                    values ('""" +ingredients_string+"','"+name_on_order+ """')"""
-
-st.write(my_insert_stmt)
-
-time_to_insert = st.button('Submit Order')
-if time_to_insert:
-    if ingredients_string:
+    if st.button("Submit Order"):
         session.sql(my_insert_stmt).collect()
-    st.success('Your Smoothie is ordered, '+name_on_order+'!!', icon="✅")
-import requests  
-smoothiefroot_response = requests.get("[https://my.smoothiefroot.com/api/fruit/watermelon](https://my.smoothiefroot.com/api/fruit/watermelon)")  
-st.text(smoothiefroot_response)
+        st.success("Your Smoothie is ordered, " + name_on_order + "!! ✅")
+
+# External API call (fixed URL string)
+try:
+    smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/watermelon")
+    st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
+except requests.exceptions.RequestException as e:
+    st.error(f"API request failed: {e}")
