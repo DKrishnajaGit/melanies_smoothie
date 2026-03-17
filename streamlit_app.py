@@ -2,7 +2,7 @@
 import streamlit as st
 # from snowflake.snowpark.python import aamply
 
-# from snowflake.snowpark.context import get_active_session
+from snowflake.snowpark.context import get_active_session
 from snowflake.snowpark.functions import col
 
 
@@ -28,23 +28,21 @@ ingredient_list = st.multiselect(
 if ingredient_list:
     # st.write(ingredient_list)
     # st.text(ingredient_list)
-    ingrediants_string = ''    
+    ingredients_string = ''    
     for fruit_chosen in ingredient_list:
-        ingrediants_string+= fruit_chosen + ' '
+        ingredients_string += fruit_chosen + ' '
         
     st.write("You selected:", ingredient_list)
 
 # my_insert_stmt = """ insert into smoothies.public.orders(ingredients) values ('""" + ingrediants_string + """')"""
 
 my_insert_stmt = """ insert into smoothies.public.orders(ingredients, name_on_order)
-                    values ('""" +ingrediants_string+"','"+name_on_order+ """')"""
+                    values ('""" +ingredients_string+"','"+name_on_order+ """')"""
 
 st.write(my_insert_stmt)
 
 time_to_insert = st.button('Submit Order')
 if time_to_insert:
-    if ingrediants_string:
+    if ingredients_string:
         session.sql(my_insert_stmt).collect()
     st.success('Your Smoothie is ordered, '+name_on_order+'!!', icon="✅")
-cnx = st.connection("snowflake")
-session = cnx.session()
