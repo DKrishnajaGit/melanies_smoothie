@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from snowflake.snowpark.functions import col
-
+import requests
 # Title and intro
 st.title("🥤 Customize your Smoothie! 🥤")
 st.write("Choose the fruits 🍌 🍓 🍍 🍎 🥭 🌰 you want in your custom smoothie!")
